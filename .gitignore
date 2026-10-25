@@ -1,0 +1,10 @@
+.qtcreator/*
+build/*
+*.txt.user
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+CMakeUserPresets.json
+.vscode/
+.idea/
