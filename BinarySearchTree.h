@@ -27,6 +27,38 @@ public:
 
     int elements() const { return countNodes(head.get()); }
 
+    bool remove(const T &value)
+    {
+        std::unique_ptr<Node> *slot = &head;
+        while (*slot) {
+            if (value < (*slot)->value) {
+                slot = &(*slot)->left;
+            } else if (value > (*slot)->value) {
+                slot = &(*slot)->right;
+            } else {
+                break;
+            }
+        }
+
+        if (!*slot) {
+            return false;
+        }
+
+        Node *node = slot->get();
+        if (!node->left) {
+            *slot = std::move(node->right);
+        } else if (!node->right) {
+            *slot = std::move(node->left);
+        } else {
+            std::unique_ptr<Node> *succ = &node->right;
+            while ((*succ)->left) {
+                succ = &(*succ)->left;
+            }
+            node->value = std::move((*succ)->value);
+            *succ = std::move((*succ)->right);
+        }
+    }
+
     T max() const
     {
         if (!head) {
@@ -101,6 +133,35 @@ private:
         return 1 + countNodes(n->left.get()) + countNodes(n->right.get());
     }
     T valueOf(Node *ptr) { return ptr->value; }
+    template<typename F>
+    static void preOrder(const Node *n, F &visit)
+    {
+        if (!n)
+            return;
+        visit(n->value);                 // 1. сам узел
+        preOrder(n->left.get(), visit);  // 2. левое
+        preOrder(n->right.get(), visit); // 3. правое
+    }
+
+    template<typename F>
+    static void inOrder(const Node *n, F &visit)
+    {
+        if (!n)
+            return;
+        inOrder(n->left.get(), visit);  // 1. левое
+        visit(n->value);                // 2. сам узел
+        inOrder(n->right.get(), visit); // 3. правое
+    }
+
+    template<typename F>
+    static void postOrder(const Node *n, F &visit)
+    {
+        if (!n)
+            return;
+        postOrder(n->left.get(), visit);  // 1. левое
+        postOrder(n->right.get(), visit); // 2. правое
+        visit(n->value);                  // 3. сам узел
+    }
 };
 
 #endif // BINARYSEARCHTREE_H
